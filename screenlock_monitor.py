@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import logging
 import dbus
 import subprocess
 import os
@@ -11,6 +12,9 @@ from gi.repository import GLib
 DEFAULT_LOCK_COMMAND = 'echo locked'
 DEFAULT_UNLOCK_COMMAND = 'echo unlocked'
 
+# Configure logging
+logger = logging.getLogger(__name__)
+
 last_state = None
 
 def on_screen_active_changed(value):
@@ -20,13 +24,19 @@ def on_screen_active_changed(value):
     if last_state == value:
         return
 
-    print(f"Screen active status: {value}")
+    logger.info(f"Screen active status changed to: {value}")
 
     if not value:  # Screen saver inactive = screen unlocked
-        subprocess.run(unlock_command, shell=True)
+        logger.info(f"Executing unlock command: {unlock_command}")
+        result = subprocess.run(unlock_command, shell=True)
+        if result.returncode != 0:
+            logger.error(f"Unlock command failed with return code: {result.returncode}")
         last_state = value
     else:  # Screen saver active = screen locked
-        subprocess.run(lock_command, shell=True)
+        logger.info(f"Executing lock command: {lock_command}")
+        result = subprocess.run(lock_command, shell=True)
+        if result.returncode != 0:
+            logger.error(f"Lock command failed with return code: {result.returncode}")
         last_state = value
 
 if __name__ == "__main__":
@@ -42,37 +52,70 @@ if __name__ == "__main__":
         '-u', '--unlock-command',
         help='Command to run when screen is unlocked'
     )
+    parser.add_argument(
+        '-v', '--verbose',
+        action='store_true',
+        help='Enable verbose output'
+    )
 
     args = parser.parse_args()
+
+    # Configure logging level
+    log_level = logging.DEBUG if args.verbose else logging.INFO
+    logging.basicConfig(
+        level=log_level,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+
+    logger.info("Screenlock Monitor starting...")
 
     # Determine commands: CLI args take precedence, then environment variables, then defaults
     if args.lock_command:
         lock_command = args.lock_command
+        logger.info(f"Using lock command from CLI argument: {lock_command}")
     elif 'LOCK_COMMAND' in os.environ:
         lock_command = os.environ['LOCK_COMMAND']
+        logger.info(f"Using lock command from environment variable: {lock_command}")
     else:
         lock_command = DEFAULT_LOCK_COMMAND
+        logger.info(f"Using default lock command: {lock_command}")
 
     if args.unlock_command:
         unlock_command = args.unlock_command
+        logger.info(f"Using unlock command from CLI argument: {unlock_command}")
     elif 'UNLOCK_COMMAND' in os.environ:
         unlock_command = os.environ['UNLOCK_COMMAND']
+        logger.info(f"Using unlock command from environment variable: {unlock_command}")
     else:
         unlock_command = DEFAULT_UNLOCK_COMMAND
+        logger.info(f"Using default unlock command: {unlock_command}")
 
     # Initialize the D-Bus main loop
     DBusGMainLoop(set_as_default=True)
+    logger.info("Initialized D-Bus main loop")
 
     # Connect to the D-Bus session bus
     bus = dbus.SessionBus()
+    logger.info("Connected to D-Bus session bus")
 
     # Get the ScreenSaver interface
     obj = bus.get_object("org.freedesktop.ScreenSaver", "/ScreenSaver")
     interface = dbus.Interface(obj, "org.freedesktop.ScreenSaver")
+    logger.info("Connected to ScreenSaver interface")
 
     # Connect to the ActiveChanged signal
     interface.connect_to_signal("ActiveChanged", on_screen_active_changed)
+    logger.info("Connected to ActiveChanged signal")
 
     # Run the main loop
+    logger.info("Starting main event loop")
     loop = GLib.MainLoop()
-    loop.run()
+    try:
+        loop.run()
+    except KeyboardInterrupt:
+        logger.info("Received keyboard interrupt, shutting down...")
+        loop.quit()
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}", exc_info=True)
+    finally:
+        logger.info("Screenlock Monitor stopped")
