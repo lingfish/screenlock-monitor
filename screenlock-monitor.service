@@ -1,0 +1,19 @@
+[Unit]
+Description=Screenlock Monitor
+After=graphical-session.target
+
+[Service]
+Type=simple
+User=jason
+WorkingDirectory=/tmp
+Environment="LOCK_COMMAND=echo locked"
+Environment="UNLOCK_COMMAND=echo unlocked"
+
+# Execute the script with Python
+ExecStart=/usr/bin/python3 /tmp/screen-saver-monitor/screenlock_monitor.py
+
+# Restart automatically on failure
+Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target

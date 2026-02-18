@@ -27,7 +27,7 @@ No installation required - just run the script directly.
 ### Command-line Arguments
 
 ```bash
-python3 screen_saver_monitor.py -l <lock_command> -u <unlock_command>
+python3 screenlock_monitor.py -l <lock_command> -u <unlock_command>
 ```
 
 - `-l, --lock-command`: Command to run when screen is locked
@@ -52,13 +52,13 @@ If no arguments or environment variables are provided, the script will use defau
 Lock your screen and execute a custom command:
 
 ```bash
-python3 screen_saver_monitor.py -l "echo 'Screen locked!'" -u "echo 'Screen unlocked!'"
+python3 screenlock_monitor.py -l "echo 'Screen locked!'" -u "echo 'Screen unlocked!'"
 ```
 
 Monitor screen saver and log to a file:
 
 ```bash
-python3 screen_saver_monitor.py -l "logger 'Screen locked'" -u "logger 'Screen unlocked'"
+python3 screenlock_monitor.py -l "logger 'Screen locked'" -u "logger 'Screen unlocked'"
 ```
 
 ## License
