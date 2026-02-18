@@ -9,8 +9,8 @@ WorkingDirectory=/tmp
 Environment="LOCK_COMMAND=echo locked"
 Environment="UNLOCK_COMMAND=echo unlocked"
 
-# Execute the script with Python
-ExecStart=/usr/bin/python3 /tmp/screen-saver-monitor/screenlock_monitor.py
+# Execute the script
+ExecStart=/tmp/screen-saver-monitor/screenlock_monitor.py
 
 # Restart automatically on failure
 Restart=on-failure
