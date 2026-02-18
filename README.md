@@ -1,10 +1,10 @@
-# Screen Saver Monitor
+# Screenlock Monitor
 
-A Python script that monitors screen saver activity and executes custom commands when the screen locks or unlocks.
+A Python script that monitors screen lock activity and executes custom commands when the screen locks or unlocks.
 
 ## Features
 
-- Monitors screen saver state using D-Bus (Linux)
+- Monitors screen lock state using D-Bus (Linux)
 - Executes custom commands on lock/unlock events
 - Debounce mechanism to prevent duplicate events
 - Multiple configuration options:
@@ -24,7 +24,7 @@ No installation required - just run the script directly.
 
 ## Usage
 
-### Command-line Arguments
+### Command-line arguments
 
 ```bash
 python3 screenlock_monitor.py -l <lock_command> -u <unlock_command>
@@ -33,15 +33,14 @@ python3 screenlock_monitor.py -l <lock_command> -u <unlock_command>
 - `-l, --lock-command`: Command to run when screen is locked
 - `-u, --unlock-command`: Command to run when screen is unlocked
 
-### Environment Variables
+### Environment variables
 
 ```bash
 export LOCK_COMMAND="your_lock_command"
 export UNLOCK_COMMAND="your_unlock_command"
-python3 screen_saver_monitor.py
 ```
 
-### Default Behavior
+### Default behavior
 
 If no arguments or environment variables are provided, the script will use default commands:
 - Lock command: `echo locked`
